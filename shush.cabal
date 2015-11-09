@@ -4,7 +4,7 @@
 name:                Shush 
 version:             0.1.0.0
 synopsis:            Shush is a simple Haskell unfinished server for HTTP
--- description:         
+description:         Shush is a simple Haskell unfinished server for HTTP
 homepage:            jmittertreiner.ca
 -- license:             GPL-3
 -- license-file:        LICENSE
@@ -18,8 +18,8 @@ cabal-version:       >=1.10
 
 executable shush
   main-is:             shush.hs
-  -- other-modules:       
+  other-modules:       Config
   -- other-extensions:    
-  build-depends:       base >=4.8, network, ConfigFile, mtl
+  build-depends:       base >= 4.8, network 
   hs-source-dirs:      src
   default-language:    Haskell2010

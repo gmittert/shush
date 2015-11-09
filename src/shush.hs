@@ -1,6 +1,5 @@
 import Network.Socket
-import Data.ConfigFile
-import Control.Monad.Except
+import Config
 
 main :: IO ()
 main = do
@@ -35,11 +34,14 @@ runConn (sock, _) httpVersion = do
   mesg <- recv sock 4069
   putStrLn mesg
   --send sock (if httpVersion == "1.0" then genMessage else genMessage)
-  send sock genMessage
+  message <- genMessage
+  send sock message
   sClose sock
 
-genMessage :: String
-genMessage = genHeader (length genBody) ++ "\r\n "++ genBody
+genMessage :: IO String
+genMessage = do
+    body <- genBody
+    return $ genHeader (length body) ++ "\r\n "++ body ++ "\r\n"
 
 genHeader :: Int -> String
 genHeader len = "HTTP/1.0 200 OK\r\n" ++
@@ -48,6 +50,5 @@ genHeader len = "HTTP/1.0 200 OK\r\n" ++
     "Content-Type: text/html\r\n" ++
     "Content-Length: " ++ show len ++ "\r\n"
 
-genBody :: String
-genBody = "<html><head><title>Shush</title></head>" ++ 
-    "<body>Hello World</body></html>\r\n"
+genBody :: IO String
+genBody = readFile "index.html"
