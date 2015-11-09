@@ -3,6 +3,7 @@ import Config
 
 main :: IO ()
 main = do
+    config <- parseConfigFile "shush.conf"
     -- create socket
     sock <- socket AF_INET Stream 0
 
@@ -17,10 +18,10 @@ main = do
     setSocketOption sock ReuseAddr 1
 
     -- listen on TCP port 80
-    bindSocket sock (SockAddrInet 80 iNADDR_ANY)
+    bindSocket sock (SockAddrInet 9001 iNADDR_ANY)
     -- allow a maximum of 1 outstanding connections
     listen sock 1
-    mainLoop sock "1.0"
+    mainLoop sock $ getValue config "http_version"
 
 mainLoop :: Socket -> String -> IO ()
 mainLoop sock httpVersion = do

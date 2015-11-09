@@ -5,10 +5,36 @@ file = "shush.conf"
 type Key = String
 type Value = String
 type File = String
-data Config = Config File
+type Config = [(Key,Value)]
 
-parseConfig :: Config -> [(Key,Value)]
-parseConfig config = [("http_version", "1.0")]
+getValue ::  Config -> Key -> Value
+getValue config key = snd . head $ filter (\(x,_) -> key == x) config
 
-getValue :: Config -> Key -> Value
-getValue conf key = snd .head $ filter (\x -> key == fst x) $ parseConfig conf
+parseConfigFile :: String -> IO [(Key,Value)]
+parseConfigFile file = do
+    text <- readFile file
+    return $ parseLines (lines text)
+
+parseLines :: [String] -> Config
+parseLines ls = map parseLine (filter (\x -> head x /= '#') ls)
+
+parseLine :: String -> (Key, Value)
+parseLine str = ((getBegin.strip) str, (getEnd.strip) str)
+
+getBegin :: String -> String
+getBegin l 
+    | null l = []
+    | head l == ':' = []
+    | otherwise = head l : getBegin (tail l)
+
+getEnd :: String -> String
+getEnd l
+    | null l = []
+    | head l == ':' = tail l
+    | otherwise  = getEnd $ tail l
+
+{--
+ - Removes whitespace from a string
+ --}
+strip :: String -> String
+strip = filter (\x -> x /= ' ' && x /= '\t' && x /= '\n')
