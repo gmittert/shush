@@ -1,4 +1,5 @@
 import Network.Socket
+import qualified Data.Map.Strict as Map
 import Config
 
 main :: IO ()
@@ -32,12 +33,50 @@ mainLoop sock httpVersion = do
 
 runConn :: (Socket, SockAddr) -> String -> IO ()
 runConn (sock, _) httpVersion = do
-  mesg <- recv sock 4069
-  putStrLn mesg
-  --send sock (if httpVersion == "1.0" then genMessage else genMessage)
-  message <- genMessage
+    mesg <- recv sock 4069
+    putStrLn mesg
+    (if validate mesg then
+        if httpVersion == "1.0" then sendHTTP1_0 else sendHTTP1_1
+        else send404) sock
+    sClose sock
+
+validate :: String -> Bool
+validate mesg = not (getHTTPVersion mesg == "HTTP/1.1"
+    && not (hasHost mesg))
+
+getHTTPVersion :: String -> String
+getHTTPVersion mesg = 
+    let firstLine = (head.lines) mesg in
+        (last.words) firstLine
+
+-- The headers in a request should be fairly short, it's a
+-- better idea to just parse them strictly
+parseHeaders :: String -> Map.Map String String
+parseHeaders mesg = 
+    let headers = (tail.takeWhile (/= "").lines) mesg in
+        createMap headers
+
+createMap :: [String] -> Map.Map String String
+createMap (x:xs)
+    | null (x:xs) = Map.fromList []
+    | otherwise = Map.insert (getHeaderKey x) (getHeaderValue x) (createMap xs)
+
+getHeaderKey :: String -> String
+getHeaderKey = takeWhile (/= ':')
+
+getHeaderValue :: String -> String
+getHeaderValue = tail.dropWhile (/= ':')
+
+hasHost :: String -> Bool
+hasHost mesg = Map.member "Host" $ parseHeaders mesg
+
+send404 :: Socket -> IO Int
+send404 = undefined
+
+sendHTTP1_0 :: Socket -> IO Int
+sendHTTP1_0 sock = do
+  message <- genMessage 
   send sock message
-  sClose sock
 
 genMessage :: IO String
 genMessage = do
@@ -53,3 +92,6 @@ genHeader len = "HTTP/1.0 200 OK\r\n" ++
 
 genBody :: IO String
 genBody = readFile "index.html"
+
+sendHTTP1_1 :: Socket -> IO Int
+sendHTTP1_1 sock = undefined

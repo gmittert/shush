@@ -7,10 +7,13 @@ type Value = String
 type File = String
 type Config = [(Key,Value)]
 
+{--
+ - Returns the value of a given key for a config
+ --}
 getValue ::  Config -> Key -> Value
 getValue config key = snd . head $ filter (\(x,_) -> key == x) config
 
-parseConfigFile :: String -> IO [(Key,Value)]
+parseConfigFile :: String -> IO Config
 parseConfigFile file = do
     text <- readFile file
     return $ parseLines (lines text)
