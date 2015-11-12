@@ -22,19 +22,12 @@ parseLines :: [String] -> Config
 parseLines ls = map parseLine (filter (\x -> head x /= '#') ls)
 
 parseLine :: String -> (Key, Value)
-parseLine str = ((getBegin.strip) str, (getEnd.strip) str)
+parseLine = dropColon.span (/= ':').strip
 
-getBegin :: String -> String
-getBegin l 
-    | null l = []
-    | head l == ':' = []
-    | otherwise = head l : getBegin (tail l)
-
-getEnd :: String -> String
-getEnd l
-    | null l = []
-    | head l == ':' = tail l
-    | otherwise  = getEnd $ tail l
+dropColon :: (Key, Value) -> (Key, Value)
+dropColon (x,y) 
+    | null y = (x,y)
+    | otherwise = (x, tail y)
 
 {--
  - Removes whitespace from a string
