@@ -1,3 +1,4 @@
+module Shush where
 import Network.Socket
 import qualified Data.Map.Strict as Map
 import Config
@@ -40,32 +41,28 @@ runConn (sock, _) httpVersion = do
         else send404) sock
     sClose sock
 
+{--
+ - Given an HTTPRequest, validates if it is a valid HTTP 1.1
+ - request
+--}
 validate :: String -> Bool
-validate mesg = not (getHTTPVersion mesg == "HTTP/1.1"
+validate mesg = not (getHTTPVersion mesg == "1.1"
     && not (hasHost mesg))
 
 getHTTPVersion :: String -> String
 getHTTPVersion mesg = 
     let firstLine = (head.lines) mesg in
-        (last.words) firstLine
+        dropWhile (/='1') $ (last.words) firstLine
 
 -- The headers in a request should be fairly short, it's a
 -- better idea to just parse them strictly
 parseHeaders :: String -> Map.Map String String
 parseHeaders mesg = 
-    let headers = (tail.takeWhile (/= "").lines) mesg in
+    let headers = (tail.takeWhile (/= "").map Config.strip.lines) mesg in
         createMap headers
 
 createMap :: [String] -> Map.Map String String
-createMap (x:xs)
-    | null (x:xs) = Map.fromList []
-    | otherwise = Map.insert (getHeaderKey x) (getHeaderValue x) (createMap xs)
-
-getHeaderKey :: String -> String
-getHeaderKey = takeWhile (/= ':')
-
-getHeaderValue :: String -> String
-getHeaderValue = tail.dropWhile (/= ':')
+createMap strs = Map.fromList (map Config.parseLine strs)
 
 hasHost :: String -> Bool
 hasHost mesg = Map.member "Host" $ parseHeaders mesg

@@ -35,4 +35,4 @@ dropSndHead (x,y)
  - Removes whitespace from a string
  --}
 strip :: String -> String
-strip = filter (\x -> x /= ' ' && x /= '\t' && x /= '\n')
+strip = filter (\x -> x /= ' ' && x /= '\t' && x /= '\n' && x /= '\r')
