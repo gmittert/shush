@@ -11,7 +11,9 @@ type Config = [(Key,Value)]
  - Returns the value of a given key for a config
  --}
 getValue ::  Config -> Key -> Value
-getValue config key = snd . head $ filter (\(x,_) -> key == x) config
+getValue config key = 
+    let match = filter (\(x,_) -> key == x) config in
+        (if null match then "" else (snd.head) match)
 
 parseConfigFile :: String -> IO Config
 parseConfigFile file = do
@@ -22,10 +24,10 @@ parseLines :: [String] -> Config
 parseLines ls = map parseLine (filter (\x -> head x /= '#') ls)
 
 parseLine :: String -> (Key, Value)
-parseLine = dropColon.span (/= ':').strip
+parseLine = dropSndHead.span (/= ':').strip
 
-dropColon :: (Key, Value) -> (Key, Value)
-dropColon (x,y) 
+dropSndHead :: (Key, Value) -> (Key, Value)
+dropSndHead (x,y) 
     | null y = (x,y)
     | otherwise = (x, tail y)
 
