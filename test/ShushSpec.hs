@@ -2,10 +2,10 @@
 
 module ShushSpec (spec) where
 
+import Shush
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import qualified Data.Map as Map
-import Shush
 
 spec :: Spec
 request11 =  "GET somefile.html HTTP/1.1\r\n\

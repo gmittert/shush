@@ -15,8 +15,8 @@ source-repository head
     type:  git
     location: https://github.com/jmittert/shush
 executable shush
-    main-is:             shush.hs
-    other-modules:       Config
+    main-is:             Main.hs
+    other-modules:       Shush,Config
     -- other-extensions:    
     build-depends:       base >= 4 && < 5,
                          network,
