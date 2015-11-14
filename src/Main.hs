@@ -1,8 +1,22 @@
+{-|
+Module        : Main
+Description  : Shush is a Simple HTTP server
+Copyright     : (c) Jason Mittertreiner, 2015
+License       : GPL-3
+Maintainer    : jmittert@uwaterloo.ca
+Stability     : experimental
+Portability   : Unix
+
+Shush Main module
+ -}
 module Main where
 import Config
 import Shush
 import Network.Socket
 
+{-|
+ - Listen on a port to respond to HTTP Requests
+-}
 main :: IO ()
 main = do
     config <- parseConfigFile "shush.conf"
@@ -25,13 +39,14 @@ main = do
     listen sock 1
     mainLoop sock $ getValue config "http_version"
 
+-- | Accept one connection and handle it
 mainLoop :: Socket -> String -> IO ()
 mainLoop sock httpVersion = do
-  -- accept one connection and handle it
   conn <- accept sock
   runConn conn httpVersion
   mainLoop sock httpVersion
 
+-- | Manages a Socket request
 runConn :: (Socket, SockAddr) -> String -> IO ()
 runConn (sock, _) httpVersion = do
     mesg <- recv sock 4069
