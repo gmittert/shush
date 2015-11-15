@@ -22,7 +22,7 @@ send404_11 sock =
 -- | Sends a HTTP 1.0 response to a socket request
 sendHTTP1_0 :: Socket -> IO Int
 sendHTTP1_0 sock = do
-  body <- readFile "index.html"
+  body <- readFile "test/resources/index.html"
   send sock $ createResponse body
 
 -- | Reads a File into a response
