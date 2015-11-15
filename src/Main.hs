@@ -12,6 +12,7 @@ Shush Main module
 module Main where
 import Config
 import Shush
+import HttpRequest
 import Network.Socket
 
 {-|
