@@ -13,6 +13,7 @@ module Shush where
 import Network.Socket
 import qualified Data.Map.Strict as Map
 import Utils
+import Config
 
 -- | Sends a 404 to a socket request
 send404_11 :: Socket -> IO Int
@@ -22,8 +23,10 @@ send404_11 sock =
 -- | Sends a HTTP 1.0 response to a socket request
 sendHTTP1_0 :: Socket -> IO Int
 sendHTTP1_0 sock = do
-  body <- readFile "test/resources/index.html"
-  send sock $ createResponse body
+    config <- parseConfigFile "shush.conf"
+    let http_path = getValue config "http_path"
+    body <- readFile $ http_path ++ "/" ++ "index.html"
+    send sock $ createResponse body
 
 -- | Reads a File into a response
 createResponse :: String -> String

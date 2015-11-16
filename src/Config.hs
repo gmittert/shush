@@ -29,8 +29,8 @@ getValue config key =
 parseConfigFile :: File -> IO Config
 parseConfigFile file = do
     text <- readFile file
-    return $ parseLines (lines text)
+    return $ (parseLines.lines) text
 
 -- | Helper method to parse String into a Config
 parseLines :: [String] -> Config
-parseLines ls = map parseLine (filter (\x -> head x /= '#') ls)
+parseLines ls = map parseLine (filter (\x -> (not.null) x && (head x /= '#')) ls)

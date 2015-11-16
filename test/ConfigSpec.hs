@@ -16,5 +16,8 @@ spec =  do
         it "Parses each given string into a tuple" $
             parseLines ["key1:value1", "key2:value2"] 
                 `shouldBe` [("key1","value1"),("key2","value2")]
+        it "Parses can handle empty lines" $
+            parseLines ["", "key2:value2"] 
+                `shouldBe` [("key2","value2")]
 main :: IO()
 main = hspec spec
