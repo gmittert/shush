@@ -1,6 +1,6 @@
 # Shush
 
-Shush is a simple http server written in Haskell
+Shush is a simple HTTP server written in Haskell
 
 ## Building
 Requirements: cabal, ghc
@@ -21,6 +21,8 @@ cabal configure --enable-tests
 cabal build
 cabal test
 ```
+
+I've personally tested it to work against Mac OSX Yosemite, and Arch Linux on GHC 7.10
 
 ## Implemented Features
 
