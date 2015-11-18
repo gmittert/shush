@@ -15,19 +15,33 @@ import qualified Data.Map.Strict as Map
 import Utils
 import HttpRequest
 import Config
+import System.IO
+import System.IO.Error
+import Control.Exception
 
--- | Sends a 404 to a socket request
+-- | Sends a 404 to a socket
 send404_11 :: Socket -> IO Int
 send404_11 sock =
     send sock $ status404_11 ++ (genHeader.length) body404 ++ "\r\n" ++ body404
+
+-- | Sends a 404 to a socket
+send404_10 :: Socket -> IO Int
+send404_10 sock =
+    send sock $ status404_10 ++ (genHeader.length) body404 ++ "\r\n" ++ body404
 
 -- | Sends a HTTP 1.0 response to a socket request
 sendHTTP1_0 :: HTTPRequest -> Socket -> IO Int
 sendHTTP1_0 req sock = do
     config <- parseConfigFile "shush.conf"
     let http_path = getValue config "http_path"
-    body <- readFile $ http_path ++ "/" ++ "index.html"
-    send sock $ createResponse body
+    let fileName = http_path ++ "/" ++ uri req
+    file <- tryIOError (openFile fileName ReadMode)::IO (Either IOError Handle)
+    case file of
+        Right handle -> do
+            body <- readFile fileName
+            hClose handle
+            send sock $ createResponse body
+        Left _ -> send404_10 sock
 
 -- | Reads a File into a response
 createResponse :: String -> String
@@ -59,4 +73,4 @@ genHeader len = "Server: Shush/0.1\r\n" ++
 
 -- | Send a HTTP 1.1 request
 sendHTTP1_1 :: HTTPRequest -> Socket -> IO Int
-sendHTTP1_1 req sock = undefined
+sendHTTP1_1 = sendHTTP1_0

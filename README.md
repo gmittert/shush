@@ -28,7 +28,7 @@ I've personally tested it to work against Mac OSX Yosemite, and Arch Linux on GH
 
 From [here](https://www.jmarshall.com/easy/http/#http1.1s2), to comply with HTTP 1.1, a server must:
  - [x] require the Host: header from HTTP 1.1 clients
- - [ ] accept absolute URL's in a request
+ - [x] accept absolute URL's in a request
  - [ ] accept requests with chunked data
  - [ ] either support persistent connections, or include the "Connection: close" header with each response
  - [ ] use the "100 Continue" response appropriately

@@ -13,6 +13,13 @@ request11 =  "GET somefile.html HTTP/1.1\r\n\
     \\r\n\
     \Body!\r\n"
 
+request11Root =  "GET / HTTP/1.1\r\n\
+    \From: foo@bar.com\r\n\
+    \User-Agent: someUser/1.0\r\n\
+    \Host:somehost\r\n\
+    \\r\n\
+    \Body!\r\n"
+
 request11Post =  "POST somefile.html HTTP/1.1\r\n\
     \From: foo@bar.com\r\n\
     \User-Agent: someUser/1.0\r\n\
@@ -151,9 +158,12 @@ spec = do
             it "returns DELETE" $
                 getMethod request11Delete `shouldBe` DELETE 
 
-    describe "Shush.getRequestURI" $
+    describe "Shush.getRequestURI" $ do
         it "returns the requested uri" $
            getRequestURI request11 `shouldBe` "somefile.html" 
+        context "Given a root uri" $
+            it "returns index.html" $
+                getRequestURI request11Root `shouldBe` "index.html" 
 
     describe "Shush.getBody" $ do
         context "If the request has a body" $
