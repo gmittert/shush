@@ -38,21 +38,24 @@ main = do
     bindSocket sock (SockAddrInet 9001 iNADDR_ANY)
     -- allow a maximum of 1 outstanding connections
     listen sock 1
-    mainLoop sock $ getValue config "http_version"
+    mainLoop sock
 
 -- | Accept one connection and handle it
-mainLoop :: Socket -> String -> IO ()
-mainLoop sock httpVersion = do
+mainLoop :: Socket -> IO ()
+mainLoop sock = do
   conn <- accept sock
-  runConn conn httpVersion
-  mainLoop sock httpVersion
+  runConn conn
+  mainLoop sock
 
 -- | Manages a Socket request
-runConn :: (Socket, SockAddr) -> String -> IO ()
-runConn (sock, _) httpVersion = do
+runConn :: (Socket, SockAddr) -> IO ()
+runConn (sock, _) = do
     mesg <- recv sock 4069
     putStrLn mesg
-    (if validate mesg then
-        if httpVersion == "1.0" then sendHTTP1_0 else sendHTTP1_1
-        else send404_11) sock
+    (case parseRequest mesg of
+        Right req -> 
+            case version req of
+                HTTP_10 -> sendHTTP1_0 req
+                HTTP_11 -> sendHTTP1_1 req
+        Left req -> send404_11 ) sock 
     sClose sock

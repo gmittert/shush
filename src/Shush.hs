@@ -13,6 +13,7 @@ module Shush where
 import Network.Socket
 import qualified Data.Map.Strict as Map
 import Utils
+import HttpRequest
 import Config
 
 -- | Sends a 404 to a socket request
@@ -21,8 +22,8 @@ send404_11 sock =
     send sock $ status404_11 ++ (genHeader.length) body404 ++ "\r\n" ++ body404
 
 -- | Sends a HTTP 1.0 response to a socket request
-sendHTTP1_0 :: Socket -> IO Int
-sendHTTP1_0 sock = do
+sendHTTP1_0 :: HTTPRequest -> Socket -> IO Int
+sendHTTP1_0 req sock = do
     config <- parseConfigFile "shush.conf"
     let http_path = getValue config "http_path"
     body <- readFile $ http_path ++ "/" ++ "index.html"
@@ -32,7 +33,9 @@ sendHTTP1_0 sock = do
 createResponse :: String -> String
 createResponse body = status200_10
         ++ genHeader (length body)
-        ++ (if null body then "" else "\r\n" ++ body)
+        ++ case body of
+            [] -> ""
+            y:ys -> "\r\n" ++ body
 
 -- | HTTP 200 1.0 response
 status200_10 = "HTTP/1.0 200 OK\r\n"
@@ -55,5 +58,5 @@ genHeader len = "Server: Shush/0.1\r\n" ++
     "Content-Length: " ++ show len ++ "\r\n"
 
 -- | Send a HTTP 1.1 request
-sendHTTP1_1 :: Socket -> IO Int
-sendHTTP1_1 sock = undefined
+sendHTTP1_1 :: HTTPRequest -> Socket -> IO Int
+sendHTTP1_1 req sock = undefined

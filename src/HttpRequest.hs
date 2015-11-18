@@ -21,6 +21,8 @@ data HTTPRequest =
                    version :: HTTPVersion,
                    -- | The method of the request, (GET, POST, PUT, etc)
                    method  :: HTTPMethod,
+                   -- | String representation requested file
+                   file :: String,
                    -- | A map of header key value pairs
                    headers :: Map.Map String String,
                    -- | String representation of the request body
@@ -32,10 +34,11 @@ parseRequest :: String -> Either Bool HTTPRequest
 parseRequest request = let
     version = getHTTPVersion request
     method = getMethod request
+    file = getRequestURI request
     headers = parseHeaders request
     body = getBody request in
         if validate request then
-            Right $ HTTPRequest version method headers body
+            Right $ HTTPRequest version method file headers body
         else Left False
 
 {-|
@@ -70,6 +73,10 @@ getStatusLine = head.lines
 -- | Returns true if a request has a Host header
 hasHost :: String -> Bool
 hasHost mesg = Map.member "Host" $ parseHeaders mesg
+
+-- | Returns the requested file of the request
+getRequestURI :: String -> String
+getRequestURI = head.tail.words 
 
 -- | Returns the HTTPMethod of a request
 -- | GET somefile.html HTTP/1.1\r\n\ -> GET

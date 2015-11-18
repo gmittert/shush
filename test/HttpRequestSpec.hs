@@ -12,14 +12,35 @@ request11 =  "GET somefile.html HTTP/1.1\r\n\
     \Host:somehost\r\n\
     \\r\n\
     \Body!\r\n"
+
+request11Post =  "POST somefile.html HTTP/1.1\r\n\
+    \From: foo@bar.com\r\n\
+    \User-Agent: someUser/1.0\r\n\
+    \Host:somehost\r\n\
+    \\r\n\
+    \Body!\r\n"
+
+request11Put =  "PUT somefile.html HTTP/1.1\r\n\
+    \From: foo@bar.com\r\n\
+    \User-Agent: someUser/1.0\r\n\
+    \Host:somehost\r\n\
+    \\r\n\
+    \Body!\r\n"
+
+request11Delete =  "DELETE somefile.html HTTP/1.1\r\n\
+    \From: foo@bar.com\r\n\
+    \User-Agent: someUser/1.0\r\n\
+    \Host:somehost\r\n\
+    \\r\n\
+    \Body!\r\n"
 parsedRequest11 = HTTPRequest
     HTTP_11
     GET
+    "somefile.html"
     (Map.fromList [("From","foo@bar.com"),
         ("User-Agent","someUser/1.0"),
         ("Host","somehost")])
     "Body!\r\n"
-
 
 request11Bad =  "GET somefile.html HTTP/1.1\r\n\
     \From: foo@bar.com\r\n\
@@ -37,6 +58,7 @@ request10 =  "GET somefile.html HTTP/1.0\r\n\
 parsedRequest10 = HTTPRequest
     HTTP_10
     GET
+    "somefile.html"
     (Map.fromList [("From","foo@bar.com"),
         ("User-Agent","someUser/1.0"),
         ("Accept","someformat")])
@@ -57,6 +79,7 @@ request11NoBody =  "GET somefile.html HTTP/1.1\r\n\
 parsedRequest11NoBody = HTTPRequest
     HTTP_11
     GET
+    "somefile.html"
     (Map.fromList [("From","foo@bar.com"),
         ("User-Agent","someUser/1.0"),
         ("Host","somehost")])
@@ -113,6 +136,24 @@ spec = do
     describe "Shush.getStatusLine" $
         it "returns the status line of a request" $
             getStatusLine request11 `shouldBe` "GET somefile.html HTTP/1.1\r"
+
+    describe "Shush.getMethod" $ do
+        context "If given a GET request" $
+            it "returns GET" $
+                getMethod request11 `shouldBe` GET
+        context "If given a POST request" $
+            it "returns POST" $
+                getMethod request11Post `shouldBe` POST
+        context "If given a PUT request" $
+            it "returns PUT" $
+                getMethod request11Put `shouldBe` PUT
+        context "If given a DELETE request" $
+            it "returns DELETE" $
+                getMethod request11Delete `shouldBe` DELETE 
+
+    describe "Shush.getRequestURI" $
+        it "returns the requested uri" $
+           getRequestURI request11 `shouldBe` "somefile.html" 
 
     describe "Shush.getBody" $ do
         context "If the request has a body" $
