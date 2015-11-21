@@ -32,7 +32,7 @@ From [here](https://www.jmarshall.com/easy/http/#http1.1s2), to comply with HTTP
  - [ ] accept requests with chunked data
  - [ ] either support persistent connections, or include the "Connection: close" header with each response
  - [ ] use the "100 Continue" response appropriately
- - [ ] include the Date: header in each response
+ - [x] include the Date: header in each response
  - [ ] handle requests with If-Modified-Since: or If-Unmodified-Since: headers
  - [ ] support at least the GET and HEAD methods
  - [x] support HTTP 1.0 requests
