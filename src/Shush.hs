@@ -14,29 +14,15 @@ import Network.Socket
 import qualified Data.Map.Strict as Map
 import Utils
 import HttpRequest
+import HttpResponse
 import Config
 import System.IO
 import System.IO.Error
 import Control.Exception
-import Data.Time
-import Data.Time.Format
 
--- | Sends a 404 to a socket
-send404_11 :: Socket -> IO Int
-send404_11 sock = do
-    header <- (genHeader.length) body404
-    send sock $ status404_11 ++ header ++ "\r\n" ++ body404
-
--- | Sends a 404 to a socket
-send404_10 :: Socket -> IO Int
-send404_10 sock = do
-    header <- (genHeader.length) body404
-    send sock $ status404_10 ++ header ++ "\r\n" ++ body404
-
--- | Sends a HTTP 1.0 response to a socket request
-sendHTTP1_0 :: HTTPRequest -> Socket -> IO Int
-sendHTTP1_0 req sock = do
-    config <- parseConfigFile "shush.conf"
+-- | Creates the body of a response to a URI request
+createURIBody:: HTTPRequest -> Config -> IO String
+createURIBody req config = do
     let http_path = getValue config "http_path"
     let fileName = http_path ++ "/" ++ uri req
     file <- tryIOError (openFile fileName ReadMode)::IO (Either IOError Handle)
@@ -44,47 +30,32 @@ sendHTTP1_0 req sock = do
         Right handle -> do
             body <- readFile fileName
             hClose handle
-            response <- createResponse body
-            send sock response
-        Left _ -> send404_10 sock
+            return (if method req == GET then body else "")
+        Left _ -> return (if method req == GET then resp404Body else "")
+        where resp404Body = "<html><head><title>404 Not Found</title></head>\
+                             \<body><p><strong>404 Not Found</strong></p></body>\
+                             \</html>"
 
--- | Reads a File into a response
-createResponse :: String -> IO String
-createResponse body = do
-    header <- (genHeader.length) body
-    return $ status200_10
-        ++ header
-        ++ case body of
-            [] -> ""
-            y:ys -> "\r\n" ++ body
+-- | Creates the headers of a URI requrest
+createHead :: HTTPRequest -> String -> IO String
+createHead req body = undefined
 
--- | HTTP 200 1.0 response
-status200_10 = "HTTP/1.0 200 OK\r\n"
--- | HTTP 404 1.0 response
-status404_10 = "HTTP/1.0 404 Not Found\r\n"
--- | HTTP 200 1.1 response
-status200_11 = "HTTP/1.1 200 OK\r\n"
--- | HTTP 404 1.1 response
-status404_11 = "HTTP/1.1 404 Not Found\r\n"
-
--- | 404 HTML String
-body404 = "<html>\r\n<head>\r\n<title>404 Not Found</title>\n\r</head>\
-\\r\n<body><p><strong>404 Not Found</strong></p></body>\r\n</html>\r\n"
-
-httpTime :: IO String
-httpTime = do
-    time <- getCurrentTime
-    return (formatTime defaultTimeLocale rfc822DateFormat time)
-
--- | Generates appriate headers for a body length
-genHeader :: Int -> IO String
-genHeader len = do
-    time <- httpTime
-    return $ "Server: Shush/0.1\r\n" ++
-        "Last-Modified: Thu, 29 Oct 2015 10:35:00 GMT\r\n" ++
-        "Content-Type: text/html\r\n" ++
-        "Date: " ++ time ++ "\r\n" ++
-        "Content-Length: " ++ show len ++ "\r\n"
+-- | Sends a HTTP 1.0 response to a socket request
+sendHTTP1_0 :: HTTPRequest -> Socket -> IO Int
+sendHTTP1_0 req sock = do
+    config <- parseConfigFile "shush.conf"
+    case method req of
+        GET -> do
+            body <- createURIBody req config
+            headers <- createHead req body
+            send sock $ headers ++ "\r\n" ++ body
+        HEAD ->  do
+            body <- createURIBody req config
+            headers <- createHead req body
+            send sock headers
+        _ -> do
+            res <- http404_10
+            send sock $ show res
 
 -- | Send a HTTP 1.1 request
 sendHTTP1_1 :: HTTPRequest -> Socket -> IO Int

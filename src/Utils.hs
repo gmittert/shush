@@ -10,6 +10,11 @@ Portability   : Unix
 This module contains various utility functions for various other shush modules
  -}
 module Utils where
+import Data.Time
+import Data.Time.Format
+
+-- | The Supported HTTP methods
+data HTTPMethod = GET | POST | DELETE | PUT | HEAD deriving (Eq, Show)
 
 -- | Given a string formatted as \"Key:Value\" returns (\"Key\",\"Value\")
 parseLine :: String -> (String, String)
@@ -24,3 +29,10 @@ dropSndHead (x,y)
 -- | Removes whitespace from a string
 strip :: String -> String
 strip = filter (\x -> x /= ' ' && x /= '\t' && x /= '\n' && x /= '\r')
+
+-- | Returns the RFC822 Formatted Date
+httpTime :: IO String
+httpTime = do
+    time <- getCurrentTime
+    return (formatTime defaultTimeLocale rfc822DateFormat time)
+

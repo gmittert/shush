@@ -13,6 +13,7 @@ module Main where
 import Config
 import Shush
 import HttpRequest
+import HttpResponse
 import Network.Socket
 
 {-|
@@ -52,10 +53,12 @@ runConn :: (Socket, SockAddr) -> IO ()
 runConn (sock, _) = do
     mesg <- recv sock 4069
     putStrLn mesg
-    (case parseRequest mesg of
+    case parseRequest mesg of
         Right req -> 
             case version req of
-                HTTP_10 -> sendHTTP1_0 req
-                HTTP_11 -> sendHTTP1_1 req
-        Left req -> send404_11 ) sock 
+                HTTP_10 -> sendHTTP1_0 req sock 
+                HTTP_11 -> sendHTTP1_1 req sock
+        Left req -> do
+            res <- http404_10
+            send sock $ show res
     sClose sock

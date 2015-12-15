@@ -14,7 +14,6 @@ import qualified Data.Map.Strict as Map
 import Utils
 
 data HTTPVersion = HTTP_10 | HTTP_11 deriving (Eq, Show)
-data HTTPMethod = GET | POST | DELETE | PUT deriving (Eq, Show)
 
 data HTTPRequest =
     HTTPRequest {  -- | The version of the request, 1.1 or 1.0
@@ -87,6 +86,7 @@ getMethod response
     | method == "POST" = POST
     | method == "PUT" = PUT
     | method == "DELETE" = DELETE
+    | method == "HEAD" = HEAD
     where method = (head.words.getStatusLine) response
 
 -- | Returns true if a line is a newline

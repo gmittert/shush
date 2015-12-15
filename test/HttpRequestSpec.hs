@@ -1,6 +1,7 @@
 module HttpRequestSpec (spec) where
 
 import HttpRequest
+import Utils
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import qualified Data.Map as Map
@@ -91,6 +92,10 @@ parsedRequest11NoBody = HTTPRequest
         ("User-Agent","someUser/1.0"),
         ("Host","somehost")])
     []
+request11Head =  "HEAD somefile.html HTTP/1.1\r\n\
+    \From: foo@bar.com\r\n\
+    \User-Agent: someUser/1.0\r\n\
+    \Host:somehost\r\n"
 
 spec = do
     describe "Shush.validate" $ do
@@ -157,6 +162,9 @@ spec = do
         context "If given a DELETE request" $
             it "returns DELETE" $
                 getMethod request11Delete `shouldBe` DELETE 
+        context "If given a HEAD request" $
+            it "returns HEAD" $
+                getMethod request11Head `shouldBe` HEAD
 
     describe "Shush.getRequestURI" $ do
         it "returns the requested uri" $
