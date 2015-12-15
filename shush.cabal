@@ -1,39 +1,51 @@
-name:                shush 
+name:                shush
 version:             0.1.0.0
 synopsis:            Shush is a simple Haskell unfinished server for HTTP
-description:         Shush is a simple Haskell unfinished server for HTTP
-homepage:            jmittertreiner.ca
+description:         Please see README.md
+homepage:            http://github.com/jmittert/shush#readme
 license:             GPL-3
 license-file:        LICENSE
 author:              Jason Mittertreiner
 maintainer:          jason.mittertreiner@gmail.com
+copyright:           Jason Mittertreiner
 category:            Web
 build-type:          Simple
+-- extra-source-files:
 cabal-version:       >=1.10
 
-source-repository head
-    type:  git
-    location: https://github.com/jmittert/shush
+library
+  hs-source-dirs:      src
+  exposed-modules:     Shush
+                     , Config
+                     , Utils
+                     , HttpRequest
+                     , HttpResponse
+  build-depends:       base >= 4.7 && < 5
+                     , network
+                     , containers
+                     , time
+  default-language:    Haskell2010
+
 executable shush
-    main-is:             Main.hs
-    other-modules:       Shush,Config,Utils,HttpRequest
-    -- other-extensions:    
-    build-depends:       base >= 4 && < 5,
-                         network,
-                         containers,
-                         time,
-                         HUnit,
-                         hspec
-    hs-source-dirs:      src,test
-    default-language:    Haskell2010
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , network
+                     , shush
+  default-language:    Haskell2010
 
 test-suite hspec
-    type:                exitcode-stdio-1.0
-    main-is:             Spec.hs
-    build-depends:       base >= 4 && < 5,
-                         network,
-                         containers,
-                         hspec,
-                         time
-    hs-source-dirs:      test,src
-    default-language:    Haskell2010
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , shush
+                     , hspec
+                     ,  containers
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/jmittert/shush
