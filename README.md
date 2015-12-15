@@ -6,23 +6,23 @@ Shush is a simple HTTP server written in Haskell
 Requirements: cabal, ghc
 ```
 git clone http://github.com/jmittert/shush
-cabal install
+stack setup
+stack build
 ```
 
 ## Runing:
 ```
-cabal run
+stack install
+shush
 ```
 Shush will listen on port 9001 by default, and read from index.html
 
 ## Testing:
 ```
-cabal configure --enable-tests
-cabal build
-cabal test
+stack test
 ```
 
-I've personally tested it to work against Mac OSX Yosemite, and Arch Linux on GHC 7.10
+I've personally tested it to work against Mac OSX Yosemite, and Arch Linux
 
 ## Implemented Features
 
