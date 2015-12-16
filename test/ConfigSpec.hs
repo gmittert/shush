@@ -1,6 +1,6 @@
 module ConfigSpec where
-import SpecHelper
 import Config
+import Test.Hspec
 
 spec :: Spec
 spec =  do

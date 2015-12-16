@@ -1,5 +1,5 @@
 module UtilsSpec where
-import SpecHelper
+import Test.Hspec
 import Utils
 
 spec :: Spec

@@ -1,7 +1,6 @@
 module HttpResponseSpec (spec) where
 
 import HttpResponse
-import Utils
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import qualified Data.Map as Map
