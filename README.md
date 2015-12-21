@@ -6,7 +6,7 @@ You can build and run shush with or without docker.
 ## Docker
 
 ### Building
-Simply run
+Clone the repo and run
 ```
 docker build -t shush .
 ```
@@ -18,29 +18,31 @@ docker run -d -p 9001:9001 -v /YOUR/HTML/DIR:/var/www/html jmittert/shush
 ```
 
 ### Testing
-Simple run
+Simply run
 ```
 stack test
 ```
 
 
 ## Without Docker
-Be sure to disable docker in stack.yaml. Change "enable:true" to false in the docker section.
+Be sure to disable docker in stack.yaml. Change `enable:true` to `enable:false` in the docker section.
 
 ## Building
 Requirements: stack
+Stack will handle downloading the correct ghc and dependencies.
 ```
 git clone http://github.com/jmittert/shush
 stack setup
 stack build
 ```
 
-### Building
+### Running
+Clone the repo and run
 ```
 stack install
 shush
 ```
-Shush will listen on port 9001 by default, and read from index.html
+Shush will listen on port 9001 by default, and read from /var/www/html/index.html
 
 ### Testing
 ```
