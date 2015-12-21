@@ -22,13 +22,13 @@ parseLine = dropSndHead.span (/= ':').strip
 
 -- | Drops the head of the snd of a tuple if it exists
 dropSndHead :: (String, String) -> (String, String)
-dropSndHead (x,y) 
+dropSndHead (x,y)
     | null y = (x,y)
     | otherwise = (x, tail y)
 
 -- | Removes whitespace from a string
 strip :: String -> String
-strip = filter (\x -> x /= ' ' && x /= '\t' && x /= '\n' && x /= '\r')
+strip = filter (\ x -> x /= ' ' && x /= '\t' && x /= '\n' && x /= '\r')
 
 -- | Returns the RFC822 Formatted Date
 httpTime :: IO String
