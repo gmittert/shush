@@ -2,27 +2,52 @@
 
 Shush is a simple HTTP server written in Haskell
 
+You can build and run shush with or without docker.
+## Docker
+
+### Building
+Simply run
+```
+docker build -t shush .
+```
+
+### Running
+You'll need to forward the port, and mount your html directory inside the container. By default, shush runs on port 9001, and reads files from `/var/www/html`
+```
+docker run -d -p 9001:9001 -v /YOUR/HTML/DIR:/var/www/html jmittert/shush
+```
+
+### Testing
+Simple run
+```
+stack test
+```
+
+
+## Without Docker
+Be sure to disable docker in stack.yaml. Change "enable:true" to false in the docker section.
+
 ## Building
-Requirements: cabal, ghc
+Requirements: stack
 ```
 git clone http://github.com/jmittert/shush
 stack setup
 stack build
 ```
 
-## Runing:
+### Building
 ```
 stack install
 shush
 ```
 Shush will listen on port 9001 by default, and read from index.html
 
-## Testing:
+### Testing
 ```
 stack test
 ```
 
-I've personally tested it to work against Mac OSX Yosemite, and Arch Linux
+I've tested the above to work against Mac OSX Yosemite, and Arch Linux
 
 ## Implemented Features
 
@@ -34,5 +59,5 @@ From [here](https://www.jmarshall.com/easy/http/#http1.1s2), to comply with HTTP
  - [ ] use the "100 Continue" response appropriately
  - [x] include the Date: header in each response
  - [ ] handle requests with If-Modified-Since: or If-Unmodified-Since: headers
- - [ ] support at least the GET and HEAD methods
+ - [x] support at least the GET and HEAD methods
  - [x] support HTTP 1.0 requests
