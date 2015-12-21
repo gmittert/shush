@@ -21,7 +21,7 @@ type Config = [(Key,Value)]
 
 -- | Returns the Value of a Config for a given Key
 getValue ::  Config -> Key -> Value
-getValue config key = 
+getValue config key =
     let match = filter (\(x,_) -> key == x) config in
         (if null match then "" else (snd.head) match)
 

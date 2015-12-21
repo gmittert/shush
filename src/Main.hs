@@ -22,6 +22,7 @@ import Network.Socket
 main :: IO ()
 main = do
     config <- parseConfigFile "shush.conf"
+    port <- getValue "http_port"
     -- create socket
     sock <- socket AF_INET Stream 0
 
@@ -35,8 +36,8 @@ main = do
     --}
     setSocketOption sock ReuseAddr 1
 
-    -- listen on TCP port 80
-    bindSocket sock (SockAddrInet 9001 iNADDR_ANY)
+    -- listen on the specifed port
+    bindSocket sock (SockAddrInet port iNADDR_ANY)
     -- allow a maximum of 1 outstanding connections
     listen sock 1
     mainLoop sock
@@ -54,9 +55,9 @@ runConn (sock, _) = do
     mesg <- recv sock 4069
     putStrLn mesg
     case parseRequest mesg of
-        Right req -> 
+        Right req ->
             case version req of
-                HTTP_10 -> sendHTTP1_0 req sock 
+                HTTP_10 -> sendHTTP1_0 req sock
                 HTTP_11 -> sendHTTP1_1 req sock
         Left req -> do
             res <- http404_10
