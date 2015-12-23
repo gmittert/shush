@@ -35,10 +35,9 @@ data HTTPResponse =
 
 instance Show HTTPResponse where
     show (HTTPResponse status headers body) =
-        status ++
-        formatHeaders headers ++
-        "\r\n"                ++
-        body ++ "\r\n"
+        status ++ "\r\n" ++
+        formatHeaders headers ++ "\r\n" ++
+        body
 
 -- | Creates an HTTPResponse out of a status line and body
 createHTTPResponse :: String -> String -> IO HTTPResponse
@@ -62,7 +61,7 @@ genHeader len = do
 -- | ...
 -- | Key: Value\r\n
 formatHeaders :: Map.Map String String -> String
-formatHeaders = Map.foldrWithKey' (\key val y -> key ++ "," ++ val ++ "\r\n" ++ y) ""
+formatHeaders = Map.foldrWithKey' (\key val y -> key ++ ": " ++ val ++ "\r\n" ++ y) ""
 
 -- | Returns the headers of a response in a String formatted as
 -- | Key: Value\r\n
