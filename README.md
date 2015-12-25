@@ -51,6 +51,17 @@ stack test
 
 I've tested the above to work against Mac OSX Yosemite, and Arch Linux
 
+### Example Config File
+Place your config file in ~/.shush.conf or /etc/shush/shush.conf
+```
+# The version of HTTP to use (1.0 or 1.1)
+http_version: 1.0
+
+# The path to look for HTTP files
+http_path: /var/www/html
+```
+
+
 ## Implemented Features
 
 From [here](https://www.jmarshall.com/easy/http/#http1.1s2), to comply with HTTP 1.1, a server must:

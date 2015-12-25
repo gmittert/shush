@@ -37,7 +37,7 @@ createURIBody req config = do
 -- | Sends a HTTP 1.0 response to a socket request
 sendHTTP1_0 :: HTTPRequest -> Socket -> IO Int
 sendHTTP1_0 req sock = do
-    config <- parseConfigFile "shush.conf"
+    config <- parseConfigFiles
     case method req of
         HEAD ->  do
             body <- createURIBody req config

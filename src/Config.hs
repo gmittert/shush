@@ -11,8 +11,13 @@ This module contains various functions for reading and handling config files
  -}
 module Config where
 import Utils
+import System.IO
+import System.IO.Error
+import Control.Exception
+import Data.Monoid
 
-file = "shush.conf"
+files = [ "~/.shush.conf"
+        , "/etc/shush/shush.conf"]
 
 type Key = String
 type Value = String
@@ -23,13 +28,29 @@ type Config = [(Key,Value)]
 getValue ::  Config -> Key -> Value
 getValue config key =
     let match = filter (\(x,_) -> key == x) config in
-        (if null match then "" else (snd.head) match)
+      (if null match then "" else (snd.head) match)
+
+-- | Returns a default config
+defaultConfig :: Config
+defaultConfig = [("http_version","1.0"),("http_path","/var/www/html")]
 
 -- | Given a File name, returns a Config
-parseConfigFile :: File -> IO Config
+parseConfigFiles :: IO Config
+parseConfigFiles = do
+    configs <- getConfigs
+    case getFirst . mconcat . map First $ configs of
+      Just a -> return a
+      Nothing -> return defaultConfig
+
+getConfigs :: IO [Maybe Config]
+getConfigs = mapM parseConfigFile files
+
+parseConfigFile :: String -> IO (Maybe Config)
 parseConfigFile file = do
-    text <- readFile file
-    return $ (parseLines.lines) text
+    text <- tryIOError (readFile file)
+    case text of
+        Right config -> return $ Just $ (parseLines.lines) config
+        Left _ -> return Nothing
 
 -- | Helper method to parse String into a Config
 parseLines :: [String] -> Config
