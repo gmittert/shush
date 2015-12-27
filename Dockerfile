@@ -11,6 +11,5 @@ RUN cd /opt/shush && cabal install
 
 ENV PATH /root/.cabal/bin:$PATH
 
-WORKDIR /opt/shush
 EXPOSE 80
-CMD ["shush"]
+ENTRYPOINT ["shush"]
