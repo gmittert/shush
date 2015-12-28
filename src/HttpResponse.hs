@@ -19,7 +19,8 @@ module HttpResponse (HTTPResponse,
                      status,
                      body,
                      headers,
-                     headerStr
+                     headerStr,
+                     formatHeaders
         ) where
 import qualified Data.Map.Strict as Map
 import Utils
@@ -36,24 +37,25 @@ data HTTPResponse =
 instance Show HTTPResponse where
     show (HTTPResponse status headers body) =
         status ++ "\r\n" ++
-        formatHeaders headers ++ "\r\n" ++
+        formatHeaders headers ++
+        "\r\n" ++
         body
 
 -- | Creates an HTTPResponse out of a status line and body
 createHTTPResponse :: String -> String -> IO HTTPResponse
 createHTTPResponse status body = do
-    headers <- (genHeader.length) body
-    return $ HTTPResponse status headers body
-
--- | Generates appriate headers for a body length
-genHeader :: Int -> IO (Map.Map String String)
-genHeader len = do
     time <- httpTime
-    return $ Map.fromList [("Server", "Shush/0.1"),
+    let headers = genHeader ((show.length) body) time in
+      return $ HTTPResponse status headers body
+
+-- | Generates appriate headers for a body length and time
+genHeader :: String -> String -> Map.Map String String
+genHeader len time =
+    Map.fromList [("Server", "Shush/0.1"),
         ("Last-Modified", time),
         ("Content-Type", "text/html"),
         ("Date", time),
-        ("Content-Length", show len)]
+        ("Content-Length", len)]
 
 -- | Formats a Map String String as
 -- | Key: Value\r\n
@@ -75,10 +77,8 @@ headerStr req = formatHeaders (headers req)
 status200_10 = "HTTP/1.0 200 OK"
 -- | HTTP 200 1.1 response
 status200_11 = "HTTP/1.1 200 OK"
-
 -- | Returns a HTTP 404 HTTPResponse for HTTP/1.1
 http404_11 = http404 "HTTP/1.1 404 Not Found"
-
 -- | Returns a HTTP 404 HTTPResponse for HTTP/1.0
 http404_10 = http404 "HTTP/1.0 404 Not Found"
 
@@ -87,4 +87,4 @@ http404 status = createHTTPResponse status http404Body
 
 -- | Returns a body for a HTTP 404 response
 http404Body = "<html><head><title>404 Not Found</title></head>" ++
-    "<body><p><strong>404 Not Found</strong></p></body></html>"
+    "<body><p><strong>404 Not Found</strong></p></body></html>\r\n"
