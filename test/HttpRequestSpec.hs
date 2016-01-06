@@ -6,7 +6,6 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import qualified Data.Map as Map
 
-spec :: Spec
 request11 =  "GET somefile.html HTTP/1.1\r\n\
     \From: foo@bar.com\r\n\
     \User-Agent: someUser/1.0\r\n\
@@ -97,6 +96,7 @@ request11Head =  "HEAD somefile.html HTTP/1.1\r\n\
     \User-Agent: someUser/1.0\r\n\
     \Host:somehost\r\n"
 
+spec :: Spec
 spec = do
     describe "Shush.validate" $ do
         context "When given an invalid HTTP1.1 request" $

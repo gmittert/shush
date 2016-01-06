@@ -15,6 +15,7 @@ import Data.Time.Format
 
 -- | The Supported HTTP methods
 data HTTPMethod = GET | POST | DELETE | PUT | HEAD deriving (Eq, Show)
+data StatusCode = HTTP200 | HTTP404 | HTTP405 deriving (Eq, Show)
 
 -- | Given a string formatted as \"Key:Value\" returns (\"Key\",\"Value\")
 parseLine :: String -> (String, String)

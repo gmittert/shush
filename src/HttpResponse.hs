@@ -11,19 +11,17 @@ This module contains various HTTPResponse related functions
  -}
 module HttpResponse (HTTPResponse,
                      createHTTPResponse,
-                     http404_11,
-                     http404_10,
-                     status200_11,
-                     status200_10,
-                     http404Body,
-                     status,
+                     createHTTP404,
+                     HttpResponse.status,
                      body,
                      headers,
                      headerStr,
-                     formatHeaders
+                     formatHeaders,
+                     formatMetadata
         ) where
 import qualified Data.Map.Strict as Map
 import Utils
+import qualified HttpBody as HB
 
 data HTTPResponse =
     HTTPResponse { -- | The method of the request, (GET, POST, PUT, etc)
@@ -31,31 +29,36 @@ data HTTPResponse =
                    -- | String representation requested uri
                    headers :: Map.Map String String,
                    -- | String representation of the request body
-                   body    :: String
+                   body    :: HB.HTTPBody
                 } deriving (Eq)
 
-instance Show HTTPResponse where
-    show (HTTPResponse status headers body) =
-        status ++ "\r\n" ++
-        formatHeaders headers ++
-        "\r\n" ++
-        body
+formatMetadata :: HTTPResponse -> String
+formatMetadata resp = status resp ++ "\r\n"
+  ++ formatHeaders (headers resp)
+  ++ "\r\n"
 
 -- | Creates an HTTPResponse out of a status line and body
-createHTTPResponse :: String -> String -> IO HTTPResponse
-createHTTPResponse status body = do
-    time <- httpTime
-    let headers = genHeader ((show.length) body) time in
-      return $ HTTPResponse status headers body
+createHTTPResponse :: HB.HTTPBody -> IO HTTPResponse
+createHTTPResponse body = do
+      time <- httpTime
+      let headers = genHeader body time in
+        return $ case HB.status body of
+          HTTP200 -> HTTPResponse status200_10 headers body
+          HTTP405 -> HTTPResponse status405_10 headers body
+          HTTP404 -> HTTPResponse status404_10 headers body
+
+-- | Utility Method to create a 404 response
+createHTTP404 :: IO HTTPResponse
+createHTTP404 = createHTTPResponse HB.body404
 
 -- | Generates appriate headers for a body length and time
-genHeader :: String -> String -> Map.Map String String
-genHeader len time =
+genHeader :: HB.HTTPBody -> String -> Map.Map String String
+genHeader httpBody time =
     Map.fromList [("Server", "Shush/0.1"),
         ("Last-Modified", time),
-        ("Content-Type", "text/html"),
+        ("Content-Type", HB.contentType httpBody),
         ("Date", time),
-        ("Content-Length", len)]
+        ("Content-Length", (show.HB.contentLength) httpBody)]
 
 -- | Formats a Map String String as
 -- | Key: Value\r\n
@@ -77,14 +80,9 @@ headerStr req = formatHeaders (headers req)
 status200_10 = "HTTP/1.0 200 OK"
 -- | HTTP 200 1.1 response
 status200_11 = "HTTP/1.1 200 OK"
--- | Returns a HTTP 404 HTTPResponse for HTTP/1.1
-http404_11 = http404 "HTTP/1.1 404 Not Found"
--- | Returns a HTTP 404 HTTPResponse for HTTP/1.0
-http404_10 = http404 "HTTP/1.0 404 Not Found"
-
--- | Returns a HTTP 404 HTTPResponse for a given status
-http404 status = createHTTPResponse status http404Body
-
--- | Returns a body for a HTTP 404 response
-http404Body = "<html><head><title>404 Not Found</title></head>" ++
-    "<body><p><strong>404 Not Found</strong></p></body></html>\r\n"
+-- | HTTP 404 1.1 response
+status404_11 = "HTTP/1.1 404 Not Found"
+-- | HTTP 404 1.0 response
+status404_10 = "HTTP/1.0 404 Not Found"
+-- | HTTP 405 1.0 response
+status405_10 = "HTTP/1.0 405 Method Not Allowed"

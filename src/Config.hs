@@ -40,7 +40,9 @@ parseConfigFiles = do
     configs <- getConfigs
     case getFirst . mconcat . map First $ configs of
       Just a -> return a
-      Nothing -> return defaultConfig
+      Nothing -> do
+        putStrLn "WARNING: No config found, using defaults"
+        return defaultConfig
 
 getConfigs :: IO [Maybe Config]
 getConfigs = mapM parseConfigFile files
@@ -49,8 +51,10 @@ parseConfigFile :: String -> IO (Maybe Config)
 parseConfigFile file = do
     text <- tryIOError (readFile file)
     case text of
-        Right config -> return $ Just $ (parseLines.lines) config
-        Left _ -> return Nothing
+        Right config -> do
+          putStrLn $ "Loaded config: " ++ file
+          return $ Just $ (parseLines.lines) config
+        Left err -> return Nothing
 
 -- | Helper method to parse String into a Config
 parseLines :: [String] -> Config

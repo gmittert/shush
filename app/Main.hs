@@ -14,7 +14,9 @@ import Config
 import Shush
 import HttpRequest
 import HttpResponse
+import HttpBody
 import Network.Socket
+import qualified Network.Socket.ByteString as NSB
 
 {-|
  - Listen on a port to respond to HTTP Requests
@@ -33,7 +35,7 @@ main = do
     setSocketOption sock ReuseAddr 1
 
     -- listen on specified port
-    bindSocket sock (SockAddrInet 80 iNADDR_ANY)
+    bindSocket sock (SockAddrInet 9000 iNADDR_ANY)
     -- allow a maximum of 1 outstanding connections
     listen sock 1
     mainLoop sock
@@ -56,6 +58,6 @@ runConn (sock, _) = do
                 HTTP_10 -> sendHTTP1_0 req sock
                 HTTP_11 -> sendHTTP1_1 req sock
         Left req -> do
-            res <- http404_10
-            send sock $ show res
+            res <- createHTTP404
+            NSB.send sock $ content (HttpResponse.body res)
     sClose sock
