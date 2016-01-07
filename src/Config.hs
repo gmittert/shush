@@ -16,8 +16,7 @@ import System.IO.Error
 import Control.Exception
 import Data.Monoid
 
-files = [ "~/.shush.conf"
-        , "/etc/shush/shush.conf"]
+files = ["/etc/shush/shush.conf"]
 
 type Key = String
 type Value = String

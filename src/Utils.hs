@@ -36,4 +36,3 @@ httpTime :: IO String
 httpTime = do
     time <- getCurrentTime
     return (formatTime defaultTimeLocale rfc822DateFormat time)
-

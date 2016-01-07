@@ -16,7 +16,12 @@ import HttpRequest
 import HttpResponse
 import HttpBody
 import Network.Socket
-import qualified Network.Socket.ByteString as NSB
+import Control.Concurrent
+import Control.Monad
+import System.IO.Error
+import Control.Exception
+import Utils
+import qualified Network.Socket.ByteString as NSBS
 
 {-|
  - Listen on a port to respond to HTTP Requests
@@ -44,20 +49,24 @@ main = do
 mainLoop :: Socket -> IO ()
 mainLoop sock = do
   conn <- accept sock
-  runConn conn
+  forkIO $ runConn conn
   mainLoop sock
 
 -- | Manages a Socket request
 runConn :: (Socket, SockAddr) -> IO ()
 runConn (sock, _) = do
-    mesg <- recv sock 4069
-    putStrLn mesg
-    case parseRequest mesg of
-        Right req ->
-            case version req of
-                HTTP_10 -> sendHTTP1_0 req sock
-                HTTP_11 -> sendHTTP1_1 req sock
-        Left req -> do
-            res <- createHTTP404
-            NSB.send sock $ content (HttpResponse.body res)
-    sClose sock
+    mesg <- tryJust(guard.isEOFError) $ recv sock 4069
+    case mesg of
+      Right mesg -> do
+        putStrLn mesg
+        case parseRequest mesg of
+            Right req ->
+                case version req of
+                    HTTP_10 -> sendHTTP1_0 req sock
+                    HTTP_11 -> sendHTTP1_1 req sock
+            Left req -> do
+                res <- createHTTP404
+                NSBS.send sock $ content (HttpResponse.body res)
+        tryIOError (sClose sock)
+        return ()
+      Left err -> return ()
