@@ -24,14 +24,13 @@ import Control.Exception
 import HttpBody
 
 -- | Sends a HTTP 1.0 response to a socket request
-sendHTTP1_0 :: HTTPRequest -> Socket -> IO Int
-sendHTTP1_0 req sock = do
-    config <- parseConfigFiles
+sendHTTP1_0 :: HTTPRequest -> Socket -> Config -> IO Int
+sendHTTP1_0 req sock config = do
     reqbody <- bodyFromRequest req config
     res <- createHTTPResponse reqbody
     send sock $ formatMetadata res
     NSB.send sock $ content (HttpResponse.body res)
 
 -- | Send a HTTP 1.1 request
-sendHTTP1_1 :: HTTPRequest -> Socket -> IO Int
+sendHTTP1_1 :: HTTPRequest -> Socket -> Config -> IO Int
 sendHTTP1_1 = sendHTTP1_0

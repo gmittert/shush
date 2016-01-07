@@ -28,6 +28,8 @@ import qualified Network.Socket.ByteString as NSBS
 -}
 main :: IO ()
 main = do
+    -- Load the config
+    config <- parseConfigFiles
     -- create socket
     sock <- socket AF_INET Stream 0
 
@@ -43,18 +45,18 @@ main = do
     bindSocket sock (SockAddrInet 9000 iNADDR_ANY)
     -- allow a maximum of 1 outstanding connections
     listen sock 1
-    mainLoop sock
+    mainLoop sock config
 
 -- | Accept one connection and handle it
-mainLoop :: Socket -> IO ()
-mainLoop sock = do
+mainLoop :: Socket -> Config -> IO ()
+mainLoop sock config = do
   conn <- accept sock
-  forkIO $ runConn conn
-  mainLoop sock
+  forkIO $ runConn conn config
+  mainLoop sock config
 
 -- | Manages a Socket request
-runConn :: (Socket, SockAddr) -> IO ()
-runConn (sock, _) = do
+runConn :: (Socket, SockAddr) -> Config -> IO ()
+runConn (sock, _) config = do
     mesg <- tryJust(guard.isEOFError) $ recv sock 4069
     case mesg of
       Right mesg -> do
@@ -62,8 +64,8 @@ runConn (sock, _) = do
         case parseRequest mesg of
             Right req ->
                 case version req of
-                    HTTP_10 -> sendHTTP1_0 req sock
-                    HTTP_11 -> sendHTTP1_1 req sock
+                    HTTP_10 -> sendHTTP1_0 req sock config
+                    HTTP_11 -> sendHTTP1_1 req sock config
             Left req -> do
                 res <- createHTTP404
                 NSBS.send sock $ content (HttpResponse.body res)
