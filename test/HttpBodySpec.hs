@@ -8,7 +8,7 @@ import Test.QuickCheck
 import Test.Hspec.QuickCheck
 
 spec :: Spec
-spec = let body = createBody  (B.pack "<html><body>test</body></html>") "text/html" in do
+spec = let body = createBody GET (B.pack "<html><body>test</body></html>") "text/html" in do
   describe "An HTTP Body" $ do
     it "has a body" $
       content body `shouldBe` B.pack "<html><body>test</body></html>"

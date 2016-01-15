@@ -11,11 +11,15 @@ import qualified Data.Map as Map
 
 -- | Test HTTP Status
 testStatus = "HTTP/1.0 200 OK"
-testBody = HB.createBodyStr "<html><body>Test body</body></html>\r\n" "text/html"
-httpResponse = createHTTPResponse testBody
-httpHeaders = headers <$> httpResponse :: IO (Map.Map String String)
+testBody = HB.createBodyStr GET "<html><body>Test body</body></html>\r\n" "text/html"
+testHEADBody = HB.createBodyStr HEAD "<html><body>Test body</body></html>\r\n" "text/html"
 
-binaryBody = HB.createBody (B.pack "⍂㐥ሱ䔶") "application/octet-stream"
+httpResponse = createHTTPResponse testBody
+httpHEADResponse = createHTTPResponse testHEADBody
+httpHeaders = headers <$> httpResponse :: IO (Map.Map String String)
+httpHEADHeaders = headers <$> httpHEADResponse :: IO (Map.Map String String)
+
+binaryBody = HB.createBody GET (B.pack "⍂㐥ሱ䔶") "application/octet-stream"
 
 expecStr :: String -> String
 expecStr time = testStatus ++ "\r\n"
@@ -51,6 +55,11 @@ spec = do
             it "has a Content Length Header" $ do
                 clen <- Map.lookup "Content-Length" <$> httpHeaders 
                 clen `shouldBe` Just ((show.HB.contentLength) testBody)
+            context "if it is a HEAD response" $
+                it "has a Content Length Header" $ do
+                    clen <- Map.lookup "Content-Length" <$> httpHEADHeaders 
+                    clen `shouldBe` Just ((show.HB.contentLength) testHEADBody)
+            
         it "can handle binary data" $ do
             resp <- createHTTPResponse binaryBody
             let ctype = Map.lookup "Content-Type" $ headers resp in do

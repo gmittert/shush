@@ -53,13 +53,13 @@ bodyFromRequest req config = do
           Right handle -> do
             body <- B.readFile fileName
             hClose handle
-            return $ createBody body fileName
+            return $ createBody GET body fileName
           Left _ -> return body404
       HEAD -> case file of
           Right handle -> do
             body <- B.readFile fileName
             hClose handle
-            return $ createBody (B.pack []) fileName
+            return $ createBody HEAD body fileName
           Left _ -> return body404
       _ -> return body404
 
@@ -106,9 +106,10 @@ guessMediaType bs f
 
 -- | Creates an HTTPBody from a ByteString and content type. Exported
 -- | for testing purposes only, use bodyFromRequest instead.
-createBody :: B.ByteString -> Filename -> HTTPBody
-createBody bs f = HTTPBody bs (B.length bs) (guessMediaType bs f) HTTP200
+createBody :: HTTPMethod -> B.ByteString -> Filename -> HTTPBody
+createBody HEAD bs f = HTTPBody (BC.pack "") (B.length bs) (guessMediaType bs f) HTTP200
+createBody method bs f = HTTPBody bs (B.length bs) (guessMediaType bs f) HTTP200
 
 -- | Creates an HTTPBody from a string and content type
-createBodyStr :: String -> Filename -> HTTPBody
-createBodyStr s =  createBody (BC.pack s)
+createBodyStr :: HTTPMethod -> String -> Filename -> HTTPBody
+createBodyStr method s =  createBody method (BC.pack s)
