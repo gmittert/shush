@@ -42,7 +42,7 @@ main = do
     setSocketOption sock ReuseAddr 1
 
     -- listen on specified port
-    bindSocket sock (SockAddrInet 9000 iNADDR_ANY)
+    bindSocket sock (SockAddrInet 80 iNADDR_ANY)
     -- allow a maximum of 1 outstanding connections
     listen sock 1
     mainLoop sock config
