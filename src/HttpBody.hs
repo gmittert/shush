@@ -18,6 +18,7 @@ module HttpBody (HTTPBody
                 , status
                 , bodyFromRequest
                 , body404
+                , getExtension
                 , createBodyStr
                 , createBody) where
 import Utils
@@ -52,13 +53,13 @@ bodyFromRequest req config = do
           Right handle -> do
             body <- B.readFile fileName
             hClose handle
-            return $ createBody body "application/octet-stream"
+            return $ createBody body fileName
           Left _ -> return body404
       HEAD -> case file of
           Right handle -> do
             body <- B.readFile fileName
             hClose handle
-            return $ createBody (B.pack []) "application/octetstream"
+            return $ createBody (B.pack []) fileName
           Left _ -> return body404
       _ -> return body404
 
@@ -76,12 +77,38 @@ body405 =  HTTPBody http404Body (B.length http404Body) "text/html" HTTP405
 body404Empty =  HTTPBody http404Body (B.length http404Body) "text/html" HTTP404
   where http404Body = B.pack []
 
+-- | Returns the extension of a Filename where the extension is
+-- | the characters after the final '.'
+getExtension :: Filename -> String
+getExtension "" = ""
+getExtension (x:xs)
+  | takeWhile (/= '.') (x:xs) == (x:xs) = ""
+  | otherwise = reverse $ helper "" (x:xs)
+  where
+  helper :: String -> String -> String
+  helper acc (x:xs)
+    | null xs = if x == '.' then "" else x:acc
+    | x == '.' = helper "" xs
+    | otherwise = helper (x:acc) xs
+
+-- | A pdf files starts with the bytes: %PDF (0x25 0x50 0x44 0x46)
+isPDF :: B.ByteString -> Bool
+isPDF bs = B.take 4 bs == B.pack [0x25, 0x50, 0x44, 0x46]
+
+-- | Guesses the type of the body media
+-- | Handles only pdf and html files
+guessMediaType :: B.ByteString -> String -> String
+guessMediaType bs f
+  | extension == "pdf" && isPDF bs = "application/pdf"
+  | extension == "html" = "text/html"
+  | otherwise = "application/octet-stream"
+  where extension = getExtension f
+
 -- | Creates an HTTPBody from a ByteString and content type. Exported
 -- | for testing purposes only, use bodyFromRequest instead.
-createBody :: B.ByteString -> String -> HTTPBody
-createBody bStr cType = HTTPBody bStr (B.length bStr) cType HTTP200
+createBody :: B.ByteString -> Filename -> HTTPBody
+createBody bs f = HTTPBody bs (B.length bs) (guessMediaType bs f) HTTP200
 
 -- | Creates an HTTPBody from a string and content type
-createBodyStr :: String -> String -> HTTPBody
-createBodyStr str cType =  let bStr = BC.pack str in
-  createBody bStr cType
+createBodyStr :: String -> Filename -> HTTPBody
+createBodyStr s =  createBody (BC.pack s)
