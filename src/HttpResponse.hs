@@ -23,6 +23,7 @@ import qualified Data.Map.Strict as Map
 import Utils
 import qualified HttpBody as HB
 
+-- | A HTTPResponse datatype
 data HTTPResponse =
     HTTPResponse { -- | The method of the request, (GET, POST, PUT, etc)
                    status :: String,
@@ -32,6 +33,10 @@ data HTTPResponse =
                    body    :: HB.HTTPBody
                 } deriving (Eq)
 
+{-|
+  Formats the headers and status line of an http response
+  into a sendable string
+-}
 formatMetadata :: HTTPResponse -> String
 formatMetadata resp = status resp ++ "\r\n"
   ++ formatHeaders (headers resp)
@@ -60,19 +65,23 @@ genHeader httpBody time =
         ("Date", time),
         ("Content-Length", (show.HB.contentLength) httpBody)]
 
--- | Formats a Map String String as
--- | Key: Value\r\n
--- | Key: Value\r\n
--- | ...
--- | Key: Value\r\n
+{-|
+  Formats a Map String String as
+  Key: Value\r\n
+  Key: Value\r\n
+   ...
+  Key: Value\r\n
+-}
 formatHeaders :: Map.Map String String -> String
 formatHeaders = Map.foldrWithKey' (\key val y -> key ++ ": " ++ val ++ "\r\n" ++ y) ""
 
--- | Returns the headers of a response in a String formatted as
--- | Key: Value\r\n
--- | Key: Value\r\n
--- | ...
--- | Key: Value\r\n
+{-|
+  Returns the headers of a response in a String formatted as
+  Key: Value\r\n
+  Key: Value\r\n
+   ...
+  Key: Value\r\n
+-}
 headerStr :: HTTPResponse -> String
 headerStr req = formatHeaders (headers req)
 

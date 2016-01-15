@@ -30,6 +30,7 @@ import System.IO
 import System.IO.Error
 import Control.Exception
 
+-- | An HTTPBody data type
 data HTTPBody =
     HTTPBody { -- | The body of the HttpBody
                content  :: B.ByteString,
@@ -41,8 +42,10 @@ data HTTPBody =
                status :: StatusCode
                } deriving (Eq, Show)
 
--- | Given an HTTP Request and a Config, produces an appropriate 
--- | body, handling IO and possible 404s
+{-|
+  Given an HTTP Request and a Config, produces an appropriate 
+  body, handling IO and possible 404s
+-}
 bodyFromRequest :: HTTPRequest -> Config -> IO HTTPBody
 bodyFromRequest req config = do
     let http_path = getValue config "http_path"
@@ -63,13 +66,17 @@ bodyFromRequest req config = do
           Left _ -> return body404
       _ -> return body404
 
--- | Body for a HTTP 404 response
--- | Creates a body indicating a 404
+{-|
+  Body for a HTTP 404 response
+  Creates a body indicating a 404
+-}
 body404 =  HTTPBody http404Body (B.length http404Body) "text/html" HTTP404
   where http404Body = BC.pack "<html><head><title>404 Not Found</title></head><body><p><strong>404 Not Found</strong></p></body></html>\r\n"
 
--- | Body for a HTTP 405 response
--- | Creates a body indicating a 405
+{-|
+   Body for a HTTP 405 response
+   Creates a body indicating a 405
+-}
 body405 =  HTTPBody http404Body (B.length http404Body) "text/html" HTTP405
   where http404Body = BC.pack "<html><head><title>405 Method Not Allowed</title></head><body><p><strong>405 Method Not Allowed</strong></p></body></html>\r\n"
 
@@ -77,8 +84,10 @@ body405 =  HTTPBody http404Body (B.length http404Body) "text/html" HTTP405
 body404Empty =  HTTPBody http404Body (B.length http404Body) "text/html" HTTP404
   where http404Body = B.pack []
 
--- | Returns the extension of a Filename where the extension is
--- | the characters after the final '.'
+{-|
+  Returns the extension of a Filename where the extension is
+  the characters after the final '.'
+-}
 getExtension :: Filename -> String
 getExtension "" = ""
 getExtension (x:xs)
@@ -95,8 +104,10 @@ getExtension (x:xs)
 isPDF :: B.ByteString -> Bool
 isPDF bs = B.take 4 bs == B.pack [0x25, 0x50, 0x44, 0x46]
 
--- | Guesses the type of the body media
--- | Handles only pdf and html files
+{-|
+  Guesses the type of the body media
+  Handles only pdf and html files
+-}
 guessMediaType :: B.ByteString -> String -> String
 guessMediaType bs f
   | extension == "pdf" && isPDF bs = "application/pdf"
@@ -104,8 +115,10 @@ guessMediaType bs f
   | otherwise = "application/octet-stream"
   where extension = getExtension f
 
--- | Creates an HTTPBody from a ByteString and content type. Exported
--- | for testing purposes only, use bodyFromRequest instead.
+{-|
+  Creates an HTTPBody from a ByteString and content type.
+  Exported for testing purposes only, use bodyFromRequest instead.
+-}
 createBody :: HTTPMethod -> B.ByteString -> Filename -> HTTPBody
 createBody HEAD bs f = HTTPBody (BC.pack "") (B.length bs) (guessMediaType bs f) HTTP200
 createBody method bs f = HTTPBody bs (B.length bs) (guessMediaType bs f) HTTP200

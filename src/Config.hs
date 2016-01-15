@@ -16,11 +16,14 @@ import System.IO.Error
 import Control.Exception
 import Data.Monoid
 
+-- | The list of possible locations for the config file
 files = ["/etc/shush/shush.conf"]
 
+-- | Key type
 type Key = String
+-- | Value type
 type Value = String
-type File = String
+-- | A Config is a list of String String tuples
 type Config = [(Key,Value)]
 
 -- | Returns the Value of a Config for a given Key
@@ -43,10 +46,12 @@ parseConfigFiles = do
         putStrLn "WARNING: No config found, using defaults"
         return defaultConfig
 
+-- | Returns a list of possible config files
 getConfigs :: IO [Maybe Config]
 getConfigs = mapM parseConfigFile files
 
-parseConfigFile :: String -> IO (Maybe Config)
+-- | Given a file name, parses it into a config
+parseConfigFile :: Filename -> IO (Maybe Config)
 parseConfigFile file = do
     text <- tryIOError (readFile file)
     case text of
@@ -55,6 +60,6 @@ parseConfigFile file = do
           return $ Just $ (parseLines.lines) config
         Left err -> return Nothing
 
--- | Helper method to parse String into a Config
+-- | Helper method to parse a lines into a Config
 parseLines :: [String] -> Config
 parseLines ls = map parseLine (filter (\x -> (not.null) x && (head x /= '#')) ls)

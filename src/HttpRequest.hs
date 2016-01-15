@@ -13,8 +13,10 @@ module HttpRequest where
 import qualified Data.Map.Strict as Map
 import Utils
 
+-- | Data type representing HTTP/1.0 or HTTP/1.1
 data HTTPVersion = HTTP_10 | HTTP_11 deriving (Eq, Show)
 
+-- | An HttpRequest datatype
 data HTTPRequest =
     HTTPRequest {  -- | The version of the request, 1.1 or 1.0
                    version :: HTTPVersion,
