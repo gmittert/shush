@@ -15,14 +15,14 @@ import Shush
 import HttpRequest
 import HttpResponse
 import HttpBody
-import Network.Socket
 import Control.Concurrent
 import Control.Monad
 import System.IO
 import System.IO.Error
 import Control.Exception
 import Utils
-import qualified Network.Socket.ByteString as NSBS
+import Network.Socket hiding (send, hPutStrLn)
+import Network.Socket.ByteString hiding (recv)
 
 {-|
  - Listen on a port to respond to HTTP Requests
@@ -63,13 +63,17 @@ runConn (sock, _) config = do
       Right mesg -> do
         hPutStrLn stderr mesg
         case parseRequest mesg of
-            Right req -> do
-                case version req of
-                    HTTP_10 -> sendHTTP1_0 req sock config
-                    HTTP_11 -> sendHTTP1_1 req sock config
-            Left req -> do
+            Right req ->
+                (case version req of
+                    HTTP_10 -> sendHTTP1_0
+                    HTTP_11 -> sendHTTP1_1) req sock config
+            Left _ -> do
                 res <- createHTTP404
-                NSBS.send sock $ content (HttpResponse.body res)
+                send sock $ content (HttpResponse.body res)
+        -- Hack, hard code a wait for the socket to finish
+        -- before closing. Should be checking the socket status
+        -- then closing it when it is done
+        threadDelay 90000000
         tryIOError (sClose sock)
         return ()
       Left err -> return ()
