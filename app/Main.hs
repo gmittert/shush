@@ -18,6 +18,7 @@ import HttpBody
 import Network.Socket
 import Control.Concurrent
 import Control.Monad
+import System.IO
 import System.IO.Error
 import Control.Exception
 import Utils
@@ -60,9 +61,9 @@ runConn (sock, _) config = do
     mesg <- tryJust(guard.isEOFError) $ recv sock 4069
     case mesg of
       Right mesg -> do
-        putStrLn mesg
+        hPutStrLn stderr mesg
         case parseRequest mesg of
-            Right req ->
+            Right req -> do
                 case version req of
                     HTTP_10 -> sendHTTP1_0 req sock config
                     HTTP_11 -> sendHTTP1_1 req sock config
