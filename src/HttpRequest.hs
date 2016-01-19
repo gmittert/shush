@@ -78,7 +78,7 @@ hasHost mesg = Map.member "Host" $ parseHeaders mesg
 -- | Returns the requested file of the request
 getRequestURI :: String -> String
 getRequestURI req = let uri = words req !! 1 in
-    (if uri == "/" then "index.html" else uri)
+    (if last uri == '/' then uri++"index.html" else uri)
 
 -- | Returns the HTTPMethod of a request
 -- | GET somefile.html HTTP/1.1\r\n\ -> GET

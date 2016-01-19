@@ -130,9 +130,9 @@ spec = do
         context "If the request doesn't have a Host field" $
             it "returns false " $
                 hasHost request11Bad `shouldBe` False
-            
+
     describe "Shush.parseRequest" $ do
-        context "If given a valid 1.0 request" $ 
+        context "If given a valid 1.0 request" $
             it "Should successfully generate a struct" $
                 parseRequest request10 `shouldBe` Right parsedRequest10
         context "If given a valid 1.1 request" $
@@ -161,17 +161,17 @@ spec = do
                 getMethod request11Put `shouldBe` PUT
         context "If given a DELETE request" $
             it "returns DELETE" $
-                getMethod request11Delete `shouldBe` DELETE 
+                getMethod request11Delete `shouldBe` DELETE
         context "If given a HEAD request" $
             it "returns HEAD" $
                 getMethod request11Head `shouldBe` HEAD
 
     describe "Shush.getRequestURI" $ do
         it "returns the requested uri" $
-           getRequestURI request11 `shouldBe` "somefile.html" 
+           getRequestURI request11 `shouldBe` "somefile.html"
         context "Given a root uri" $
-            it "returns index.html" $
-                getRequestURI request11Root `shouldBe` "index.html" 
+            it "returns /index.html" $
+                getRequestURI request11Root `shouldBe` "/index.html"
 
     describe "Shush.getBody" $ do
         context "If the request has a body" $
