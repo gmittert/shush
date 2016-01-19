@@ -112,6 +112,8 @@ guessMediaType :: B.ByteString -> String -> String
 guessMediaType bs f
   | extension == "pdf" && isPDF bs = "application/pdf"
   | extension == "html" = "text/html"
+  | extension == "txt" = "text/plain"
+  | extension == "js" = "application/javascript"
   | otherwise = "application/octet-stream"
   where extension = getExtension f
 
